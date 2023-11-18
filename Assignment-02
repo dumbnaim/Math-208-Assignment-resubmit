@@ -1,0 +1,71 @@
+""""
+Naim Rahman Ifti
+ID : 20037
+
+"""
+
+import numpy as np
+from datetime import date
+
+def generate_random_numbers(n, distribution_params):
+    """
+    Generate random numbers based on the specified distribution type and parameters.
+    Parameters:
+     n Number of random numbers to generate.
+     distribution_params: Dictionary containing distribution type and parameters.
+    Returns:
+     Random numbers array.
+    """
+    if distribution_params['type'] == 'normal':
+        return np.random.normal(distribution_params['mu'], distribution_params['sigma'], n)
+    elif distribution_params['type'] == 'uniform':
+        return np.random.uniform(distribution_params['low'], distribution_params['high'], n)
+    else:
+        raise ValueError("Invalid distribution type")
+
+def verify_chebyshev_inequality(data, mu, sigma, k):
+    """
+    Verify the Chebyshev inequality for a given set of data.
+    Parameters:
+    data: Array of data points.
+     mu: Mean of the distribution.
+     sigma: Standard deviation of the distribution.
+     k: Number of standard deviations to consider.
+    Returns:
+    Count of data points within the specified bounds.
+    """
+    lower_bound = mu - k * sigma
+    upper_bound = mu + k * sigma
+    count = sum(lower_bound <= x <= upper_bound for x in data)
+    probability = count / len(data)
+    chebyshev_bound = 1 - 1 / (k**2)
+
+    print(f"Probability of |X - u| = {probability} ; 1 - 1 / (k^2) = {chebyshev_bound}")
+    print(f"When k = {k}, P(|X - u| < k*sd) > {1 - 1 / k**2} is {'True' if probability >= chebyshev_bound else 'False'}")
+    return count
+
+def main():
+    # Define parameters for normal and uniform distributions
+    normal_params = {'type': 'normal', 'mu': 10, 'sigma': 0.5}
+    uniform_params = {'type': 'uniform', 'low': -20, 'high': 20}
+
+    n_samples = 50
+
+    # Generate random numbers for normal and uniform distributions
+    lst_normal = generate_random_numbers(n_samples, normal_params)
+    lst_uniform = generate_random_numbers(n_samples, uniform_params)
+
+    k_values = [1, 2**0.5, 1.5, 2, 3]
+
+    for k in k_values:
+        print("\nNormal distribution:")
+        cnt_normal = verify_chebyshev_inequality(lst_normal, normal_params['mu'], normal_params['sigma'], k)
+
+        print("\nUniform distribution:")
+        cnt_uniform = verify_chebyshev_inequality(lst_uniform, 0, (20 - (-20)) / (2 * (3 ** 0.5)), k)
+
+if __name__ == "__main__":
+    main()
+
+today = date.today()
+print("Today's Date:", today)
