@@ -1,0 +1,101 @@
+""""
+Naim Rahman Ifti
+ID : 20037
+
+"""
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import date
+
+def read_data(file_path):
+    """
+    Read data from an Excel file and handle exceptions.
+    Parameters:
+    file_path (str): Path to the Excel file.
+    Returns:
+    pd.DataFrame or None: DataFrame containing the data, or None if an error occurs.
+    """
+    try:
+        df = pd.read_excel(file_path, engine='openpyxl')
+        return df
+    except Exception as e:
+        print(f"Error reading data: {e}")
+        return None
+
+def calculate_statistics(data):
+    """
+    Calculate various statistics for a given dataset.
+    Parameters:
+    data (list): List of numerical data.
+
+    Returns:
+    tuple or None: Tuple containing mean, variance, std_dev, z_scores, median, Q1, and Q3,
+    or None if an error occurs.
+    """
+    try:
+        mean = sum(data) / len(data)
+        variance = sum((x - mean) ** 2 for x in data) / len(data)
+        std_dev = variance ** 0.5
+        z_scores = [(x - mean) / std_dev for x in data]
+        median = sorted(data)[len(data) // 2] if len(data) % 2 == 1 else sum(sorted(data)[len(data) // 2 - 1:len(data) // 2 + 1]) / 2
+        data_sorted = sorted(data)
+        midpoint = len(data_sorted) // 2
+        lower_half = data_sorted[:midpoint]
+        upper_half = data_sorted[midpoint + 1:] if len(data_sorted) % 2 == 1 else data_sorted[midpoint:]
+        q1 = sorted(lower_half)[len(lower_half) // 2] if len(lower_half) % 2 == 1 else sum(sorted(lower_half)[len(lower_half) // 2 - 1:len(lower_half) // 2 + 1]) / 2
+        q3 = sorted(upper_half)[len(upper_half) // 2] if len(upper_half) % 2 == 1 else sum(sorted(upper_half)[len(upper_half) // 2 - 1:len(upper_half) // 2 + 1]) / 2
+
+        return mean, variance, std_dev, z_scores, median, q1, q3
+    except Exception as e:
+        print(f"Error calculating statistics: {e}")
+        return None
+
+def plot_boxplots(glucose, blood_pressure):
+    """
+    Plot boxplots for glucose and blood pressure.
+    Parameters:
+    glucose (list): List of glucose data.
+    blood_pressure (list): List of blood pressure data.
+    """
+    try:
+        fig, ax = plt.subplots()
+        ax.boxplot([glucose, blood_pressure], labels=['Glucose', 'Blood Pressure'])
+        ax.set_title('Glucose vs Blood Pressure')
+        plt.show(block=True)  # Ensure the script waits for user input before closing the plot
+    except Exception as e:
+        print(f"Error plotting boxplots: {e}")
+
+def main():
+    try:
+        # Specify the path to your file
+        file_path = 'original_diabetes.xlsx'
+
+        # Read data
+        df = read_data(file_path)
+        if df is None:
+            return
+
+        # Extract 'Glucose' and 'BloodPressure' data
+        glucose = df['Glucose'].dropna().tolist()
+        blood_pressure = df['BloodPressure'].dropna().tolist()
+
+        # Calculate statistics
+        glucose_stats = calculate_statistics(glucose)
+        blood_pressure_stats = calculate_statistics(blood_pressure)
+        if glucose_stats is None or blood_pressure_stats is None:
+            return
+
+        # Output the calculations
+        print("Glucose: mean = {}, variance = {}, std_dev = {}, median = {}, Q1 = {}, Q3 = {}".format(*glucose_stats))
+        print("Blood Pressure: mean = {}, variance = {}, std_dev = {}, median = {}, Q1 = {}, Q3 = {}".format(*blood_pressure_stats))
+
+        # Plot boxplots
+        plot_boxplots(glucose, blood_pressure)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
+
+today = date.today()
+print("Today's date:", today)
