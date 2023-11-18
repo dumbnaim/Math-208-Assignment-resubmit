@@ -1,0 +1,61 @@
+""""
+Naim Rahman Ifti
+ID : 20037
+
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import date
+
+# Data
+data = {'M': [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        'N': [30, 25, 95, 115, 265, 325, 570, 700, 1085, 1300]}
+df = pd.DataFrame(data)
+
+# Linear regression
+m = df['M'].values.reshape(-1,1)
+n = df['N'].values.reshape(-1,1)
+o = np.column_stack((m, np.ones_like(m)))
+# Use numpy's least squares method to find the coefficients for a linear fit (y = mx + b)
+# The result 'coeff' contains the slope (m) and intercept (b)
+coeff = np.linalg.lstsq(o, n, rcond=None)[0]
+# Calculate the correlation coefficient between M and N
+r = np.corrcoef(df['M'], df['N'])[0, 1]
+
+# Plotting the data
+plt.figure(figsize=(10, 6))
+plt.scatter(df['M'], df['N'], color='red', label='Data points')
+
+# Plotting the linear fit with confidence intervals
+plt.plot(df['M'], coeff[1] + coeff[0] * df['M'], label=f'Linear Fit; y = {coeff[1][0]:.2f} + {coeff[0][0]:.2f}x, r = {r:.2f}', color='blue')
+# Confidence intervals: shaded region around the linear fit
+plt.fill_between(df['M'], (coeff[1] - 1.96*coeff[0]) + coeff[0] * df['M'], (coeff[1] + 1.96*coeff[0]) + coeff[0] * df['M'], color='blue', alpha=0.2)
+
+# Try polynomial fit
+p = np.polyfit(df['M'], df['N'], 2)  # Fit a polynomial of degree 2; change 2 for a higher-order polynomial
+poly = np.poly1d(p)
+new_m = np.linspace(df['M'].min(), df['M'].max(), 100)
+new_n = poly(new_m)
+
+# Highlight intersection points between linear and polynomial fits
+intersection_points = np.roots(p - coeff[0][0])
+intersection_n = poly(intersection_points)
+plt.scatter(intersection_points, intersection_n, color='green', label='Intersection Points')
+
+plt.plot(new_m, new_n, label='Polynomial Fit', color='green')
+
+# Adding labels, title, legend, and grid to the plot
+plt.title('Data points and Fitting Models')
+plt.xlabel('M')
+plt.ylabel('N')
+plt.legend()
+plt.grid(True)
+
+# Show the plot
+plt.show()
+
+# Print today's date
+today = date.today()
+print("Today's date:", today)
+
